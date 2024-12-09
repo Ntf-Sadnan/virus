@@ -5,26 +5,27 @@ const axios = require("axios");
 const app = express();
 app.use(bodyParser.json());
 
-// Replace these with your keys
+// Tokens directly in the file
 const PAGE_ACCESS_TOKEN = "EAAMtZBSvbeGgBO96SzxPRxxpjEUNzrkbByzUwVu1qEuH0hCwgPrbn89QCnFoA2QoMzLCZCX1SYAu36n03LydlCHBS2dnoF1lBlRQ929b6BpVK92sovkt1NaDqGhvZAgVDRPg6sjacuDRZCHQu4zDnQsKM8ZAJeOm7svqy53kQpAUCg1FEru4S4u2cTeHsYf51";
 const GROQ_API_KEY = "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";
+const VERIFY_TOKEN = "your_verify_token";
 
-// Webhook verification
+// Webhook Verification
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "your_verify_token";
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    console.log("WEBHOOK_VERIFIED");
+    console.log("Webhook Verified");
     res.status(200).send(challenge);
   } else {
+    console.log("Webhook Verification Failed");
     res.sendStatus(403);
   }
 });
 
-// Handle messages
+// Handle Incoming Messages
 app.post("/webhook", async (req, res) => {
   const body = req.body;
 
@@ -40,7 +41,7 @@ app.post("/webhook", async (req, res) => {
         const botReply = await getGroqReply(userMessage);
 
         // Send response back to Facebook Messenger
-        sendMessage(senderId, botReply);
+        await sendMessage(senderId, botReply);
       }
     }
     res.status(200).send("EVENT_RECEIVED");
@@ -87,6 +88,5 @@ async function getGroqReply(userMessage) {
 }
 
 // Start server
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
