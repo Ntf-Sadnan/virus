@@ -27,6 +27,8 @@ app.get("/webhook", (req, res) => {
 
 // Handle Incoming Messages
 app.post("/webhook", async (req, res) => {
+  console.log("Received webhook event:", req.body);
+
   const body = req.body;
 
   if (body.object === "page") {
@@ -35,12 +37,12 @@ app.post("/webhook", async (req, res) => {
       const senderId = event.sender.id;
 
       if (event.message && event.message.text) {
+        console.log("Message received from user:", event.message.text);
         const userMessage = event.message.text;
 
-        // Get Groq API response
         const botReply = await getGroqReply(userMessage);
+        console.log("Bot reply before sending:", botReply);
 
-        // Send response back to Facebook Messenger
         await sendMessage(senderId, botReply);
       }
     }
@@ -59,14 +61,14 @@ async function sendMessage(recipientId, text) {
   };
 
   try {
-    await axios.post(url, payload);
-    console.log("Message sent successfully");
+    const result = await axios.post(url, payload);
+    console.log("Message sent to Facebook:", result.data);
   } catch (error) {
-    console.error("Error sending message:", error.response.data);
+    console.error("Error sending message to Facebook:", error.response?.data || error.message);
   }
 }
 
-// Get reply from Groq API
+// Fetch reply from Groq API
 async function getGroqReply(userMessage) {
   const url = "https://api.groq.com/openai/v1/chat/completions";
   const headers = {
@@ -79,10 +81,13 @@ async function getGroqReply(userMessage) {
   };
 
   try {
+    console.log("Sending message to Groq API:", userMessage);
     const response = await axios.post(url, data, { headers });
-    return response.data.choices[0].message.content;
+    console.log("Groq API Response:", response.data);
+
+    return response.data.choices[0]?.message?.content || "Sorry, I couldn't process that.";
   } catch (error) {
-    console.error("Error fetching Groq reply:", error.response.data);
+    console.error("Error fetching Groq reply:", error.response?.data || error.message);
     return "Sorry, I couldn't process that.";
   }
 }
