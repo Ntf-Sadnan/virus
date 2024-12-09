@@ -1,4 +1,11 @@
 {
+  "name": "facebook-groq-bot",
+  "version": "1.0.0",
+  "description": "A Facebook Messenger bot powered by the Groq API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "axios": "^1.7.9",
     "body-parser": "^1.20.3",
